@@ -1,6 +1,6 @@
 /* pngrtran.c - transforms the data in a row for PNG readers
  *
- * Copyright (c) 2018-2025 Cosmin Truta
+ * Copyright (c) 2018-2026 Cosmin Truta
  * Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
  * Copyright (c) 1996-1997 Andreas Dilger
  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
@@ -230,7 +230,7 @@ png_set_strip_alpha(png_structrp png_ptr)
  *
  * Terminology (assuming power law, "gamma", encodings):
  *    "screen" gamma: a power law imposed by the output device when digital
- *    samples are converted to visible light output.  The EOTF - volage to
+ *    samples are converted to visible light output.  The EOTF - voltage to
  *    luminance on output.
  *
  *    "file" gamma: a power law used to encode luminance levels from the input
@@ -495,6 +495,9 @@ png_set_quantize(png_structrp png_ptr, png_colorp palette,
    if (png_rtran_ok(png_ptr, 0) == 0)
       return;
 
+   if (palette == NULL)
+      return;
+
    png_ptr->transformations |= PNG_QUANTIZE;
 
    if (full_quantize == 0)
@@ -708,8 +711,8 @@ png_set_quantize(png_structrp png_ptr, png_colorp palette,
                          break;
 
                      t->next = hash[d];
-                     t->left = (png_byte)i;
-                     t->right = (png_byte)j;
+                     t->left = png_ptr->palette_to_index[i];
+                     t->right = png_ptr->palette_to_index[j];
                      hash[d] = t;
                   }
                }
@@ -1120,8 +1123,8 @@ png_set_rgb_to_gray(png_structrp png_ptr, int error_action, double red,
 #if defined(PNG_READ_USER_TRANSFORM_SUPPORTED) || \
     defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
 void PNGAPI
-png_set_read_user_transform_fn(png_structrp png_ptr, png_user_transform_ptr
-    read_user_transform_fn)
+png_set_read_user_transform_fn(png_structrp png_ptr,
+    png_user_transform_ptr read_user_transform_fn)
 {
    png_debug(1, "in png_set_read_user_transform_fn");
 
@@ -1364,7 +1367,7 @@ png_resolve_file_gamma(png_const_structrp png_ptr)
    if (file_gamma != 0)
       return file_gamma;
 
-   /* If png_reciprocal oveflows it returns 0 which indicates to the caller that
+   /* If png_reciprocal overflows, it returns 0, indicating to the caller that
     * there is no usable file gamma.  (The checks added to png_set_gamma and
     * png_set_alpha_mode should prevent a screen_gamma which would overflow.)
     */
@@ -1843,6 +1846,7 @@ png_init_read_transformations(png_structrp png_ptr)
              * transformations elsewhere.
              */
             png_ptr->transformations &= ~(PNG_COMPOSE | PNG_GAMMA);
+            png_ptr->flags &= ~PNG_FLAG_OPTIMIZE_ALPHA;
          } /* color_type == PNG_COLOR_TYPE_PALETTE */
 
          /* if (png_ptr->background_gamma_type!=PNG_BACKGROUND_GAMMA_UNKNOWN) */

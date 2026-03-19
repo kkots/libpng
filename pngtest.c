@@ -50,7 +50,7 @@
 #define STDERR stdout
 
 /* Generate a compiler error if there is an old png.h in the search path. */
-typedef png_libpng_version_1_6_51 Your_png_h_is_not_version_1_6_51;
+typedef png_libpng_version_1_6_56_git Your_png_h_is_not_version_1_6_56_git;
 
 /* Ensure that all version numbers in png.h are consistent with one another. */
 #if (PNG_LIBPNG_VER != PNG_LIBPNG_VER_MAJOR * 10000 + \
@@ -501,8 +501,8 @@ pngtest_error(png_structp png_ptr, png_const_charp message)
  */
 typedef struct memory_information
 {
-   png_alloc_size_t          size;
-   png_voidp                 pointer;
+   png_alloc_size_t size;
+   png_voidp pointer;
    struct memory_information *next;
 } memory_information;
 typedef memory_information *memory_infop;
@@ -640,10 +640,10 @@ chunk used in ImageMagick to store "virtual page" size).  */
 typedef struct user_chunk_info_def
 {
    png_const_infop info_ptr;
-   png_uint_32     vpAg_width, vpAg_height;
-   png_byte        vpAg_units;
-   png_byte        sTER_mode;
-   int             location[2];
+   png_uint_32 vpAg_width, vpAg_height;
+   png_byte vpAg_units;
+   png_byte sTER_mode;
+   int location[2];
 } user_chunk_info;
 
 /* Used for location and order; zero means nothing. */
@@ -858,7 +858,8 @@ test_one_file(const char *inname, const char *outname)
    static FILE *fpout;  /* "static" prevents setjmp corruption */
    pngtest_error_parameters error_parameters;
    png_structp read_ptr;
-   png_infop read_info_ptr, end_info_ptr;
+   png_infop read_info_ptr;
+   png_infop end_info_ptr;
 #ifdef PNG_WRITE_SUPPORTED
    png_structp write_ptr;
    png_infop write_info_ptr;
@@ -1299,7 +1300,8 @@ test_one_file(const char *inname, const char *outname)
 #endif
 #ifdef PNG_pCAL_SUPPORTED
    {
-      png_charp purpose, units;
+      png_charp purpose;
+      png_charp units;
       png_charpp params;
       png_int_32 X0, X1;
       int type, nparams;
